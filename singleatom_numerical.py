@@ -4,7 +4,7 @@ from scipy.integrate import solve_ivp
 from functools import partial
 
 laser_freq = 1
-detuning = .4
+detuning = 1
 
 
 def f(laser_freq, detuning, time, state):
@@ -20,10 +20,14 @@ d = partial(f, laser_freq, detuning)
 sol = solve_ivp(d, [0, 10], [1+0j, 0+0j], max_step=.01)
 
 # Plotting modulus square of c1, cr
-plt.plot(sol.t, np.abs(sol.y[0])**2)
-plt.plot(sol.t, np.abs(sol.y[1])**2)
+plt.plot(sol.t, np.abs(sol.y[0])**2, label='$|c_1|^2$')
+plt.plot(sol.t, np.abs(sol.y[1])**2, label='$|c_r|^2$')
 
 # Normalisation
-plt.plot(sol.t, np.abs(sol.y[0])**2 + np.abs(sol.y[1])**2)
+plt.plot(sol.t, np.abs(sol.y[0])**2 + np.abs(sol.y[1])**2, label='normalisation')
 
+plt.xlabel('Time, $t$')
+plt.ylabel('Probability Amplitude')
+plt.legend()
 plt.show()
+
