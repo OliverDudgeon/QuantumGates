@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from functools import partial
 
-laser_freq = 1
-detuning = 1
-
 
 def f(laser_freq, detuning, time, state):
     """
@@ -15,19 +12,25 @@ def f(laser_freq, detuning, time, state):
     return [-1j*laser_freq*state[1], -1j*(laser_freq*state[0] + detuning*state[1])]
 
 
-d = partial(f, laser_freq, detuning)
+def solve_with(*, laser_freq=1, detuning=0.5, tf=10):
 
-sol = solve_ivp(d, [0, 10], [1+0j, 0+0j], max_step=.01)
+    d = partial(f, laser_freq, detuning)
 
-# Plotting modulus square of c1, cr
-plt.plot(sol.t, np.abs(sol.y[0])**2, label='$|c_1|^2$')
-plt.plot(sol.t, np.abs(sol.y[1])**2, label='$|c_r|^2$')
+    return solve_ivp(d, [0, tf], [1+0j, 0+0j], max_step=.01)
 
-# Normalisation
-plt.plot(sol.t, np.abs(sol.y[0])**2 + np.abs(sol.y[1])**2, label='normalisation')
 
-plt.xlabel('Time, $t$')
-plt.ylabel('Probability Amplitude')
-plt.legend()
-plt.show()
+if __name__ == "__main__":
+    sol = solve_with()
 
+    # Plotting modulus square of c1, cr
+    plt.plot(sol.t, np.abs(sol.y[0])**2, label='$|c_1|^2$')
+    plt.plot(sol.t, np.abs(sol.y[1])**2, label='$|c_r|^2$')
+
+    # Normalisation
+    plt.plot(sol.t, np.abs(sol.y[0])**2 +
+             np.abs(sol.y[1])**2, label='normalisation')
+
+    plt.xlabel('Time, $t$')
+    plt.ylabel('Probability Amplitude')
+    plt.legend()
+    plt.show()
