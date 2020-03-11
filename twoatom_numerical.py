@@ -4,7 +4,8 @@ from scipy.integrate import solve_ivp
 from functools import partial
 
 
-def f(laser_freq, detuning_1, detuning_2, V, time, state):
+def f(laser_func, detuning_1, detuning_2, V, time, state):
+    laser_freq = laser_func(time)
     return [
         -1j * (laser_freq * (state[1] + state[2])),
         -1j * (detuning_2 * state[1] + laser_freq * (state[3] + state[0])),
@@ -14,16 +15,21 @@ def f(laser_freq, detuning_1, detuning_2, V, time, state):
     ]
 
 
-def solve_with(*, laser_freq=1, detuning_1=0.5, detuning_2=0.5, V=1, tf=10, init=None):
+def solve_with(*, laser_func=lambda t: 1, detuning_1=0.5, detuning_2=0.5, V=1, tf=10, init=None):
     if init is None:
         init = [1+0j, 0+0j, 0+0j, 0+0j]
-    d = partial(f, laser_freq, detuning_1, detuning_2, V)
+    d = partial(f, laser_func, detuning_1, detuning_2, V)
 
     return solve_ivp(d, [0, tf], init, max_step=.01)
 
 
+def sine_squared(amplitude, characteristic_time, time):
+    return amplitude * np.sin(time/characteristic_time)**2
+
+
 if __name__ == '__main__':
-    sol = solve_with()
+
+    sol = solve_with(laser_func=partial(sine_squared, 2, 5))
 
     # Individual Prob. Amps
     plt.plot(sol.t, np.abs(sol.y[0])**2, label='$|c_{11}|^2$')
