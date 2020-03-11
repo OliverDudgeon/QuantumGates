@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from singleatom_numerical import solve_with as solve_singleatom
-from twoatom_nointeraction_numerical import solve_with as solve_twoatom
+from twoatom_numerical import solve_with as solve_twoatom
 
 sol1 = solve_singleatom(laser_freq=1, detuning=0.5, tf=10, init=[1+0j, 0+0j])
 sol2 = solve_twoatom(laser_freq=1, detuning_1=0.5,
@@ -22,5 +22,5 @@ plt.xlabel('Time, $t$')
 plt.ylabel('Probability Amplitude')
 plt.legend(frameon=False, ncol=5, loc='upper center',
            bbox_to_anchor=(0.5, 1.1))
-plt.savefig('single_twoatom_noint_compare.png', dpi=100)
+plt.savefig('single_twoatom_compare.png', dpi=100)
 plt.show()
