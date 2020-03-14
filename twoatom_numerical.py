@@ -15,7 +15,17 @@ def f(laser_func, detuning_1, detuning_2, V, time, state):
     ]
 
 
-def solve_with(*, laser_func=lambda t: 1, detuning_1=0.5, detuning_2=0.5, V=1, tf=10, init=None):
+def default_laser_func(t):
+    return 1
+
+
+def solve_with(*, laser=None, detuning_1=0.5, detuning_2=0.5, V=1, tf=10, init=None):
+    if laser is None:
+        laser_func = default_laser_func
+    elif type(laser) in (float, int, complex):
+        def laser_func(t): return laser
+    else:
+        laser_func = laser
     if init is None:
         init = [1+0j, 0+0j, 0+0j, 0+0j]
     d = partial(f, laser_func, detuning_1, detuning_2, V)
@@ -29,7 +39,7 @@ def sine_squared(amplitude, characteristic_time, time):
 
 if __name__ == '__main__':
 
-    sol = solve_with(laser_func=partial(sine_squared, 2, 5))
+    sol = solve_with(laser=partial(sine_squared, 2, 5))
 
     # Individual Prob. Amps
     plt.plot(sol.t, np.abs(sol.y[0])**2, label='$|c_{11}|^2$')
