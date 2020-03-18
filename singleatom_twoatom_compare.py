@@ -5,8 +5,8 @@ from singleatom_numerical import solve_with as solve_singleatom
 from twoatom_numerical import solve_with as solve_twoatom
 
 sol1 = solve_singleatom(laser_freq=1, detuning=0.5, tf=10, init=[1+0j, 0+0j])
-sol2 = solve_twoatom(laser_freq=1, detuning_1=0.5,
-                     detuning_2=0.5, tf=10, init=[0+0j, 0+0j, 0+0j, 1+0j])
+sol2 = solve_twoatom(laser=1, detuning_1=0.5,
+                     detuning_2=0.5, tf=10, init=[0+0j, 0+0j, 0+0j, 1+0j], V=0)
 
 plt.plot(sol1.t, np.abs(sol1.y[0])**2, label='$|c_1|^2$')
 plt.plot(sol1.t, np.abs(sol1.y[1])**2, label='$|c_r|^2$')
