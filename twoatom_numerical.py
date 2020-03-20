@@ -43,7 +43,7 @@ def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, tf=1148.5
     
     d = partial(f, laser_func, detuning_1_func, detuning_2_func, V)
     
-    return solve_ivp(d, [0, tf], init, max_step=.01)
+    return solve_ivp(d, [0, tf], init, max_step=.1)
 
 
 def sine_squared(amplitude, characteristic_time, time):
