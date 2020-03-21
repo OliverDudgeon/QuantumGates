@@ -4,10 +4,19 @@ from scipy.integrate import solve_ivp
 from functools import partial
 
 
+def sine_squared(amplitude, characteristic_time, time):
+    return amplitude * np.sin(time*np.pi/characteristic_time)**2
+
+
+def cos_squared(amplitude, characteristic_time, time):
+    return amplitude * np.cos(time*np.pi/characteristic_time)**2
+
+
 def f(laser_func, detuning_func_1, detuning_func_2, V, time, state):
     laser_freq = laser_func(time)
     detuning_1 = detuning_func_1(time)
     detuning_2 = detuning_func_2(time)
+
     return [
         -1j * (laser_freq * (state[1] + state[2])),
         -1j * (detuning_2 * state[1] + laser_freq * (state[3] + state[0])),
@@ -18,11 +27,11 @@ def f(laser_func, detuning_func_1, detuning_func_2, V, time, state):
 
 
 def default_laser_func(t):
-    return 1
+    return sine_squared(0.1, 1148.5, t)
 
 
 def default_detuning(t):
-    return 0.5
+    return cos_squared(1.8, 1148.5, t)
 
 
 def func_make(w, default):
@@ -35,7 +44,7 @@ def func_make(w, default):
     return func
 
 
-def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, tf=1148.5, init=None):
+def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, tf=10, init=None):
 
     laser_func = func_make(laser, default_laser_func)
     detuning_1_func = func_make(detuning_1, default_detuning)
@@ -46,37 +55,21 @@ def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, tf=1148.5
 
     d = partial(f, laser_func, detuning_1_func, detuning_2_func, V)
 
-    return solve_ivp(d, [0, tf], init, max_step=.1)
-
-
-def sine_squared(amplitude, characteristic_time, time):
-    return amplitude * np.sin((time*np.pi)/characteristic_time)**2
-
-
-def cos_squared(amplitude, characteristic_time, time):
-    return amplitude * np.cos((time*np.pi)/characteristic_time)**2
+    return solve_ivp(d, [0, tf], init, max_step=.01)
 
 
 if __name__ == '__main__':
 
-    sol = solve_with(laser=partial(sine_squared, 0.1, 1148.5),
-                     detuning_1=partial(cos_squared, 1.8, 1148.5),
-                     detuning_2=partial(cos_squared, 1.8, 1148.5))
+    sol = solve_with(tf=1148.5)
 
-    # Individual Prob. Amps
-    plt.plot(sol.t, np.abs(sol.y[0])**2, label='$|c_{11}|^2$')
-    plt.plot(sol.t, np.abs(sol.y[1])**2, label='$|c_{1r}|^2$')
-    plt.plot(sol.t, np.abs(sol.y[2])**2, label='$|c_{r1}|^2$', linestyle='--')
-    plt.plot(sol.t, np.abs(sol.y[3])**2, label='$|c_{rr}|^2$')
-
-    norm = (np.abs(sol.y[0])**2
-            + np.abs(sol.y[2])**2
-            + np.abs(sol.y[3])**2
-            + np.abs(sol.y[1])**2)
-    plt.plot(sol.t, norm, label='Normalisation')
+    # Individual phases
+    plt.plot(sol.t, np.angle(sol.y[0]), label='$arg(c_{11})$')
+    plt.plot(sol.t, np.angle(sol.y[1]), label='$arg(c_{1r})$')
+    plt.plot(sol.t, np.angle(sol.y[2]), label='$arg(c_{r1})$', linestyle='--')
+    plt.plot(sol.t, np.angle(sol.y[3]), label='$arg(c_{rr})$')
 
     plt.xlabel('Time, $t$')
-    plt.ylabel('Probability Amplitude')
+    plt.ylabel('Phase')
     plt.legend(frameon=False, ncol=5, loc='upper center',
                bbox_to_anchor=(0.5, 1.1))
     plt.savefig('twoatom_numerical.png', dpi=100)
