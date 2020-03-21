@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from functools import partial
 
+from utils.formatter import multiple_formatter
+
 
 def sine_squared(amplitude, characteristic_time, time):
     return amplitude * np.sin(time*np.pi/characteristic_time)**2
@@ -64,9 +66,14 @@ if __name__ == '__main__':
 
     # Individual phases
     plt.plot(sol.t, np.angle(sol.y[0]), label='$arg(c_{11})$')
-    plt.plot(sol.t, np.angle(sol.y[1]), label='$arg(c_{1r})$')
-    plt.plot(sol.t, np.angle(sol.y[2]), label='$arg(c_{r1})$', linestyle='--')
-    plt.plot(sol.t, np.angle(sol.y[3]), label='$arg(c_{rr})$')
+    # plt.plot(sol.t, np.angle(sol.y[1]), label='$arg(c_{1r})$')
+    # plt.plot(sol.t, np.angle(sol.y[2]), label='$arg(c_{r1})$', linestyle='--')
+    # plt.plot(sol.t, np.angle(sol.y[3]), label='$arg(c_{rr})$')
+
+    ax = plt.gca()
+    ax.yaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
+    ax.yaxis.set_minor_locator(plt.MultipleLocator(np.pi / 12))
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(multiple_formatter()))
 
     plt.xlabel('Time, $t$')
     plt.ylabel('Phase')
