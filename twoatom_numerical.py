@@ -53,11 +53,12 @@ def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, tf=10, in
     detuning_2_func = func_make(detuning_2, default_detuning)
 
     if init is None:
-        init = [1+0j, 0+0j, 0+0j, 0+0j]
+        stphs=(0) #Starting phase
+        init = [np.cos(stphs)+(np.sin(stphs)*1j) , 0+0j, 0+0j, 0+0j]
 
     d = partial(f, laser_func, detuning_1_func, detuning_2_func, V)
 
-    return solve_ivp(d, [0, tf], init, max_step=.01)
+    return solve_ivp(d, [0, tf], init, max_step=.1)
 
 
 if __name__ == '__main__':
@@ -65,20 +66,33 @@ if __name__ == '__main__':
     sol = solve_with(tf=1148.5)
 
     # Individual phases
-    plt.plot(sol.t, np.angle(sol.y[0]), label='$arg(c_{11})$')
-    # plt.plot(sol.t, np.angle(sol.y[1]), label='$arg(c_{1r})$')
-    # plt.plot(sol.t, np.angle(sol.y[2]), label='$arg(c_{r1})$', linestyle='--')
-    # plt.plot(sol.t, np.angle(sol.y[3]), label='$arg(c_{rr})$')
+    fig, axs = plt.subplots(2,2, sharex=True, sharey=True)
+    
+    h=np.angle(sol.y[0])
+    print('Phase shift ',abs(h[0]-h[-1])/(np.pi),'pi')
+    
+    axs[0,0].plot(sol.t, np.angle(sol.y[0]), label='$arg(c_{11})$')
+    axs[0,1].plot(sol.t, np.angle(sol.y[1]), label='$arg(c_{1r})$', linestyle='--')
+    axs[1,0].plot(sol.t, np.angle(sol.y[2]), label='$arg(c_{r1})$', linestyle='--')
+    axs[1,1].plot(sol.t, np.angle(sol.y[3]), label='$arg(c_{rr})$')
 
-    ax = plt.gca()
-    ax.yaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
-    ax.yaxis.set_minor_locator(plt.MultipleLocator(np.pi / 12))
-    ax.yaxis.set_major_formatter(plt.FuncFormatter(multiple_formatter()))
+    axs[0,0].set_title('$arg(c_{11})$')
+    axs[0,1].set_title('$arg(c_{1r})$')
+    axs[1,0].set_title('$arg(c_{r1})$')
+    axs[1,1].set_title('$arg(c_{rr})$')
+    
+    ylb = plt.gca()
+    ylb.yaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
+    ylb.yaxis.set_minor_locator(plt.MultipleLocator(np.pi / 12))
+    ylb.yaxis.set_major_formatter(plt.FuncFormatter(multiple_formatter()))
 
-    plt.xlabel('Time, $t$')
-    plt.ylabel('Phase')
-    plt.legend(frameon=False, ncol=5, loc='upper center',
-               bbox_to_anchor=(0.5, 1.1))
-    plt.savefig('twoatom_numerical.png', dpi=100)
+    for ax in axs.flat:
+        ax.set(xlabel='Time , $t$', ylabel='Phase')
+    for ax in axs.flat:
+        ax.label_outer()
+   
+    #plt.legend(frameon=False, ncol=5, loc='upper center',
+     #          bbox_to_anchor=(0.5, 1.1))
+    plt.savefig('twoatom_numerical_phase.png', dpi=100)
 
     plt.show()
