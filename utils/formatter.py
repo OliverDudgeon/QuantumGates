@@ -1,3 +1,8 @@
+'''
+Axis tick formatter for multiples of a parameter.
+https://stackoverflow.com/questions/40642061/how-to-set-axis-ticks-in-multiples-of-pi-python-matplotlib
+'''
+
 import numpy as np
 import matplotlib.pyplot as plt
 
