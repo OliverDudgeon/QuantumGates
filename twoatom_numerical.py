@@ -48,7 +48,7 @@ def func_make(w, default):
     return func
 
 
-def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, tf=10, init=None):
+def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, T=1148.5, init=None):
 
     laser_func = func_make(laser, default_laser_func)
     detuning_1_func = func_make(detuning_1, default_detuning)
@@ -59,13 +59,13 @@ def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, tf=10, in
 
     d = partial(f, laser_func, detuning_1_func, detuning_2_func, V)
 
-    return solve_ivp(d, [0, tf], init, t_eval=np.linspace(0, tf, 10_000))
+    return solve_ivp(d, [0, T], init, t_eval=np.linspace(0, T, 10_000))
 
 
 if __name__ == '__main__':
 
-    sol1 = solve_with(tf=1148.5, V=0)
-    sol2 = solve_with(tf=1148.5, V=1.7)
+    sol1 = solve_with(V=0)
+    sol2 = solve_with(V=1.7)
 
     # Individual phases
     c1r_phase = np.angle(sol1.y[0])
