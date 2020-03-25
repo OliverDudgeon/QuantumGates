@@ -49,11 +49,14 @@ def func_make(w, default):
     return func
 
 
-def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, T=1148.5, init=None):
+def solve_with(*, laser=None, detuning_1=None, detuning_2=None, detuning=None, V=1.7, T=1148.5, init=None):
 
     laser_func = func_make(laser, default_laser_func)
-    detuning_1_func = func_make(detuning_1, default_detuning)
-    detuning_2_func = func_make(detuning_2, default_detuning)
+    if detuning is None:
+        detuning_1_func = func_make(detuning_1, default_detuning)
+        detuning_2_func = func_make(detuning_2, default_detuning)
+    else:
+        detuning_1_func = detuning_2_func = func_make(detuning, default_detuning)
 
     if init is None:
         init = [1+0j, 0+0j, 0+0j, 0+0j]
@@ -74,7 +77,8 @@ if __name__ == '__main__':
 
     entangled_phase = c11_int - c11_noint
     # Constrain phase to (-pi, pi)
-    entangled_phase = np.where(entangled_phase > 0.9*np.pi, entangled_phase - 2*np.pi, entangled_phase)
+    entangled_phase = np.where(
+        entangled_phase > 0.9*np.pi, entangled_phase - 2*np.pi, entangled_phase)
     # Constrain phase to (0, 2*pi)
     # entangled_phase = np.where(entangled_phase < 0.1, entangled_phase + 2*np.pi, entangled_phase)
 
