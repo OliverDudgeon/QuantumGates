@@ -15,6 +15,7 @@ def cos_squared(amplitude, characteristic_time, time):
 
 
 def f(laser_func, detuning_func_1, detuning_func_2, V, time, state):
+    # Factor of 0.5 due to rotating wave approximation
     laser_freq = 0.5 * laser_func(time)
     detuning_1 = detuning_func_1(time)
     detuning_2 = detuning_func_2(time)
@@ -59,23 +60,28 @@ def solve_with(*, laser=None, detuning_1=None, detuning_2=None, V=1.7, T=1148.5,
 
     d = partial(f, laser_func, detuning_1_func, detuning_2_func, V)
 
-    return solve_ivp(d, [0, T], init, t_eval=np.linspace(0, T, 10_000))
+    return solve_ivp(d, [0, T], init, t_eval=np.linspace(0, T, 1000))
 
 
 if __name__ == '__main__':
-
+    # Need both simulations in order to
     sol1 = solve_with(V=0)
     sol2 = solve_with(V=1.7)
 
     # Individual phases
-    c1r_phase = np.angle(sol1.y[0])
-    c11_phase = np.angle(sol2.y[0])
+    c11_noint = np.angle(sol1.y[0])
+    c11_int = np.angle(sol2.y[0])
 
-    entangled_phase = c11_phase - c1r_phase
+    entangled_phase = c11_int - c11_noint
+    # Constrain phase to (-pi, pi)
+    entangled_phase = np.where(entangled_phase > 1, entangled_phase - 2*np.pi, entangled_phase)
+    # Constrain phase to (0, 2*pi)
+    # entangled_phase = np.where(entangled_phase < 0.1, entangled_phase + 2*np.pi, entangled_phase)
 
     plt.plot(sol1.t, entangled_phase,
              label=f'Entangled Phase, Phase Change = {(entangled_phase[-1] - entangled_phase[0])/np.pi}')
 
+    # Plot y-axis in terms of multiples of pi
     ax = plt.gca()
     ax.yaxis.set_major_locator(plt.MultipleLocator(np.pi / 2))
     ax.yaxis.set_minor_locator(plt.MultipleLocator(np.pi / 12))
