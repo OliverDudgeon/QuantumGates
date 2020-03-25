@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     entangled_phase = c11_int - c11_noint
     # Constrain phase to (-pi, pi)
-    entangled_phase = np.where(entangled_phase > 1, entangled_phase - 2*np.pi, entangled_phase)
+    entangled_phase = np.where(entangled_phase > 0.9*np.pi, entangled_phase - 2*np.pi, entangled_phase)
     # Constrain phase to (0, 2*pi)
     # entangled_phase = np.where(entangled_phase < 0.1, entangled_phase + 2*np.pi, entangled_phase)
 
