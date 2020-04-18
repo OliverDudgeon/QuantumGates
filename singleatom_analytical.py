@@ -22,14 +22,14 @@ def solve_with(*, laser_freq=1, detuning=.0):
 
 
 if __name__ == '__main__':
-    t, cs = solve_with()
+    t, cs = solve_with(laser_freq=1, detuning=5)
     plt.plot(t, np.abs(cs[:, 0])**2, label='$|c_1|^2$')
     plt.plot(t, np.abs(cs[:, 1])**2, label='$|c_r|^2$')
-    plt.plot(t, np.sum(np.abs(cs)**2, axis=1), label='normalisation')
+    plt.plot(t, np.sum(np.abs(cs)**2, axis=1), label='Normalisation')
 
     plt.xlabel('Time, $t$')
-    plt.ylabel('Probability Amplitude')
+    plt.ylabel('Probability')
     plt.legend(frameon=False, ncol=5, loc='upper center',
                bbox_to_anchor=(0.5, 1.1))
-    plt.savefig('single_atom_analytical.png', dpi=100)
+    plt.savefig('single_atom_analytical_d5.pdf', dpi=100)
     plt.show()

@@ -5,6 +5,21 @@ from functools import partial
 
 from utils.formatter import multiple_formatter
 
+def constrain_phase(phase, t, atol=1.1):
+    """
+    Get a smooth curve of the phase by adding 2pi at the discontinuities
+    """
+    # Locate the sign changes as these are where the discontinuities occur
+    sign = np.where(np.diff(np.sign(phase)) != 0)[0] + 1
+    # Remove the roots where it smoothly crosses through 0
+    log = np.logical_not(np.isclose(phase[sign], 0, atol=atol))
+
+    # Apply the shifts at each discontinuity
+    for p in t[sign-1][log]:
+        phase = np.where(t > p, phase + 2*np.pi, phase)
+
+    return phase
+
 
 def sine_squared(amplitude, characteristic_time, time):
     return amplitude * np.sin(time*np.pi/characteristic_time)**2
@@ -67,23 +82,22 @@ def solve_with(*, laser=None, detuning_1=None, detuning_2=None, detuning=None, V
 
 
 if __name__ == '__main__':
+    plt.style.use('seaborn-talk')
+
     # Need both simulations in order to
     sol1 = solve_with(V=0)
     sol2 = solve_with(V=1.7)
 
     # Individual phases
-    c11_noint = np.angle(sol1.y[0])
-    c11_int = np.angle(sol2.y[0])
+    c11_noint = constrain_phase(np.angle(sol1.y[0]), sol1.t)
+    c11_int = constrain_phase(np.angle(sol2.y[0]), sol2.t)
 
-    entangled_phase = c11_int - c11_noint
-    # Constrain phase to (-pi, pi)
-    entangled_phase = np.where(
-        entangled_phase > 0.9*np.pi, entangled_phase - 2*np.pi, entangled_phase)
-    # Constrain phase to (0, 2*pi)
-    # entangled_phase = np.where(entangled_phase < 0.1, entangled_phase + 2*np.pi, entangled_phase)
+    entangled_phase = c11_noint - c11_int
 
+    plt.plot(sol1.t, c11_noint, label='$c_{11}(V=0)$')
+    plt.plot(sol1.t, c11_int, label='$c_{11}(V=1.7)$')
     plt.plot(sol1.t, entangled_phase,
-             label=f'Entangled Phase, Phase Change = {(entangled_phase[-1] - entangled_phase[0])/np.pi}')
+             label=f'Entangled Phase, Phase Change = {(entangled_phase[-1] - entangled_phase[0])/np.pi:.3f}')
 
     # Plot y-axis in terms of multiples of pi
     ax = plt.gca()
@@ -95,6 +109,6 @@ if __name__ == '__main__':
     plt.ylabel('Phase')
     plt.legend(frameon=False, ncol=5, loc='upper center',
                bbox_to_anchor=(0.5, 1.1))
-    plt.savefig('twoatom_numerical.png', dpi=100)
+    plt.savefig('twoatom_numerical.svg', bbox_inches='tight')
 
     plt.show()
